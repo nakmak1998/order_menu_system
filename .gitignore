@@ -1,5 +1,8 @@
-venv
+venv/
+pycharm_venv/
 __pycache__
 .idea/
-.pyc
+upload/
+node_modules/
+*.pyc
 *.sqlite3

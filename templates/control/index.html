@@ -1,0 +1,23 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <title>Линия раздачи</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'swiper-bundle.min.css'%}">
+    <link rel="stylesheet" type="text/css" href="{% static 'mealpoint.css' %}">
+    <script defer src="{% static 'swiper.js' %}"></script>
+    <script defer src="{% static 'mealpoint.js'%}"></script>
+</head>
+<body>
+    <header>
+        <h1>Получение порций</h1>
+    </header>
+    <div class="swiper-container">
+        <div id='slider' class="swiper-wrapper"></div>
+        <div class="swiper-button-next"></div>
+        <div class="swiper-button-prev"></div>
+    </div>
+</body>
+</html>

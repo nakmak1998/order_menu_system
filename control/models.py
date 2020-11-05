@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.exceptions import ValidationError
 
 
 # Create your models here.
@@ -16,18 +17,17 @@ class ProductType(models.Model):
 
 class Product(models.Model):
     name = models.CharField("Название блюда", max_length=200)
-    type = models.ForeignKey(ProductType, on_delete=models.DO_NOTHING)
+    type = models.ForeignKey(ProductType, verbose_name="Тип блюда", on_delete=models.DO_NOTHING)
 
     class Meta:
         verbose_name = "продукт"
         verbose_name_plural = "Продукты"
 
-
     def __str__(self):
         return self.name
 
 
-class MenuStructure(models.Model):
+class Menu(models.Model):
     WEEK_DAYS = [
         ('Понедельник', 'Понедельник'),
         ('Вторник', 'Вторник'),
@@ -37,18 +37,30 @@ class MenuStructure(models.Model):
         ('Суббота', 'Суббота'),
         ('Воскресенье', 'Воскресенье'),
     ]
+    week_day = models.CharField("День недели", choices=WEEK_DAYS, max_length=20)
 
+    class Meta:
+        verbose_name = "меню"
+        verbose_name_plural = "Меню"
+
+    def __str__(self):
+        return self.week_day
+
+
+class MenuStructure(models.Model):
     MEALTIME_TYPES = [
         ('Завтрак', 'Завтрак'),
         ('Обед', 'Обед'),
         ('Ужин', 'Ужин')
     ]
-    mealtime_type = models.CharField(choices=MEALTIME_TYPES, max_length=20)
-    week_day = models.CharField(choices=WEEK_DAYS, max_length=20)
-    products = models.ManyToManyField(Product)
+    menu = models.ForeignKey(Menu, verbose_name="Меню", on_delete=models.DO_NOTHING)
+    mealtime_type = models.CharField("Тип приема пищи", choices=MEALTIME_TYPES, max_length=20)
+    products = models.ManyToManyField(Product, verbose_name="Продукты")
+    start_time = models.TimeField("Время начала приема пищи", default='13:00')
+    end_time = models.TimeField("Время окончания приема пищи",  default='15:00')
 
     def __str__(self):
-        return self.week_day + " - " + self.mealtime_type
+        return self.mealtime_type
 
     class Meta:
         verbose_name = "Структура меню"
@@ -86,40 +98,47 @@ class Military(models.Model):
 
     name = models.CharField("Имя", max_length=200)
     rank = models.CharField("Воинское звание", choices=RANKS, max_length=100)
-    company = models.ForeignKey(Company, on_delete=models.DO_NOTHING)
+    company = models.ForeignKey(Company, verbose_name="Название подразделения", on_delete=models.DO_NOTHING)
+    image = models.ImageField("Фотография военнослужащего", upload_to='upload/')
 
     class Meta:
         verbose_name = "военнослужащий"
         verbose_name_plural = "Военнослужащие"
 
     def __str__(self):
-        return self.rank + " " + self.name
+        return f'{self.rank} {self.name}'
 
 
 class Order(models.Model):
     military_id = models.ForeignKey(Military, verbose_name="Военнослужащий", on_delete=models.DO_NOTHING)
     date = models.DateField("Дата приема пищи")
-    products = models.ManyToManyField(Product)
-    is_done = models.BooleanField("Статус заказа")
+
+    def clean(self):
+        qs_len = len(Order.objects.filter(date=self.date).filter(military_id=self.military_id))
+        if qs_len > 1:
+            raise ValidationError(
+                'Невозможно создать заказ. Заказ на данный день на данного военнослужащего уже зарегистрирован')
+        return super(Order, self).clean()
 
     class Meta:
-        verbose_name = "заказ"
+        verbose_name = "Заказ"
         verbose_name_plural = "Заказы"
+
+    def __str__(self):
+        return f'Заказ на {self.date} от {self.military_id}'
+
+
+class OrderItem(models.Model):
+    menu_structure = models.ForeignKey(MenuStructure, verbose_name="Тип приема пищи", on_delete=models.DO_NOTHING)
+    order = models.ForeignKey(Order, verbose_name="Заказ", on_delete=models.DO_NOTHING)
+    products = models.ManyToManyField(Product, verbose_name="Блюда")
+
+    class Meta:
+        verbose_name = "Заказ на прием пищи"
+        verbose_name_plural = "Заказы на приемы пищи"
 
     def __str__(self):
         return f"Заказ № {self.pk}"
 
-
-#
-# class Menu(models.Model):
-#     date = models.DateField("Дата")
-#     breakfast = models.ForeignKey(MenuStructure, verbose_name="Завтрак", on_delete=models.DO_NOTHING)
-#
-#     def __str__(self):
-#         return f"Меню на {self.date}"
-#
-#     class Meta:
-#         verbose_name = "Меню"
-#         verbose_name_plural = "Меню"
-
-
+    def save(self, *args, **kwargs):
+        super(OrderItem, self).save()
