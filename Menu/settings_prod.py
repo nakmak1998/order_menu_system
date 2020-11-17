@@ -22,7 +22,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'tl$(=u89)%2**0oo8+o@cldea6_!7r%*#o9ode9hx^wdxo3ov)'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = []
 
@@ -80,7 +80,10 @@ ASGI_APPLICATION = "Menu.routing.application"
 #    `sudo docker run -p 6379:6379 -d redis`
 CHANNEL_LAYERS = {
     "default": {
-        "BACKEND": "channels.layers.InMemoryChannelLayer"
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("0.0.0.0", 6379)],
+        },
     },
 }
 
@@ -89,9 +92,11 @@ CHANNEL_LAYERS = {
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+        'NAME': 'mealpoint_control_system',
+        'ENGINE': 'django.db.backends.postgresql',
+        'USER': 'mealpoint_control_system_admin',
+        'PASSWORD': '2c73a94'
+    },
 }
 
 # Password validation
@@ -131,4 +136,5 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = f'{BASE_DIR}/static/'
-MEDIA_ROOT = f'{BASE_DIR}/control/static/img/'
+MEDIA_ROOT = f'/home/mealpoint/upload/'
+

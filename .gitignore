@@ -2,6 +2,7 @@ venv/
 pycharm_venv/
 __pycache__
 .idea/
+static/
 upload/
 node_modules/
 *.pyc

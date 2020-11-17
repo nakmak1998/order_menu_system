@@ -20,6 +20,7 @@ from control import views, api
 
 api_urls = [
     path('date_choice', api.date_choice),
+    path('military_control_choice', api.military_control_choice),
     path('meal_point/military/<int:id>', api.mealpoint),
 
 ]

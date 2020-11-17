@@ -71,6 +71,52 @@
           {% if action_form and actions_on_bottom and cl.show_admin_actions %}{% admin_actions %}{% endif %}
         {% endblock %}
         {% block pagination %}{% pagination cl %}{% endblock %}
+        <br>
+        {% if table_content %}
+        <h1>{{table_title}}</h1>
+        <table>
+          <thead>
+              <tr>
+                  {% for item in table_content%}
+                      <th><div class="table-header-text">{{item.products__name}}</div></th>
+                  {% endfor %}
+              </tr>
+          </thead>
+          <tbody>
+              <tr>
+                {% for item in table_content %}
+                  <td>{{item.products__count}}</td>
+                {% endfor %}
+              </tr>
+          </tbody>
+        </table>
+        {% elif meal_control_data %}
+          <div id="mealcontrol_container">
+            <h1>Контроль питания военнослужащих</h1>
+            <input type="date" id="mealcontrol_date_input">
+            <br>
+            <table>
+              <thead>
+              <tr>
+                <th>Военнослужащий</th>
+                <th>Завтрак</th>
+                <th>Обед</th>
+                <th>Ужин</th>
+              </tr>
+              </thead>
+              <tbody>
+                {% for item in meal_control_data %}
+                <tr>
+                  <td>{{ item.military_name }}</td>
+                  <td>{{ item.breakfast }}</td>
+                  <td>{{ item.lunch }}</td>
+                  <td>{{ item.dinner }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% endif %}
         </form>
       </div>
       {% block filters %}

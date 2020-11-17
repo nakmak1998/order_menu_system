@@ -6,5 +6,5 @@ class MyAdminConfig(AdminConfig):
     default_site = 'control.admin.AdminSite'
 
 
-class AppConfig(AppConfig):
+class ApplicationConfig(AppConfig):
     name = 'control'
