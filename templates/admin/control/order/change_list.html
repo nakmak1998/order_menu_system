@@ -93,27 +93,18 @@
         {% elif meal_control_data %}
           <div id="mealcontrol_container">
             <h1>Контроль питания военнослужащих</h1>
-            <input type="date" id="mealcontrol_date_input">
-            <br>
+            <div class="actions"> <label for="mealcontrol_date_input">Выберите дату:</label> <input type="date" id="mealcontrol_date_input">
+            <br></div>
             <table>
               <thead>
               <tr>
-                <th>Военнослужащий</th>
-                <th>Завтрак</th>
-                <th>Обед</th>
-                <th>Ужин</th>
+                <th><div class="table-header-text">Военнослужащий</div></th>
+                <th><div class="table-header-text">Завтрак</div></th>
+                <th><div class="table-header-text">Обед</div></th>
+                <th><div class="table-header-text">Ужин</div></th>
               </tr>
               </thead>
-              <tbody>
-                {% for item in meal_control_data %}
-                <tr>
-                  <td>{{ item.military_name }}</td>
-                  <td>{{ item.breakfast }}</td>
-                  <td>{{ item.lunch }}</td>
-                  <td>{{ item.dinner }}</td>
-                </tr>
-                {% endfor %}
-              </tbody>
+              <tbody></tbody>
             </table>
           </div>
         {% endif %}

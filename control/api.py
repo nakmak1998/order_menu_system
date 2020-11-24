@@ -9,6 +9,9 @@ from asgiref.sync import async_to_sync
 
 
 def date_choice(request):
+    """
+    Принимает на вход указанную дату. Возвращаюет список продуктов на конкретный день недели.
+    """
     weekdays = ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье']
     request_date = json.loads(request.body)['date']
     parsed_date = date.fromisoformat(request_date)
@@ -21,26 +24,30 @@ def date_choice(request):
 
 
 def military_control_choice(request):
-    parsed_date = date.fromisoformat(json.loads(request.body)['date'])
-    orders = models.Order.objects.filter(date=parsed_date).order_by('military_id')
+    """
+    Возвращает список военнослужащих и информацию о статусе приема пищи.
+    """
+    request_date = json.loads(request.body)['date']
     military_control_data = []
-    for order_item in orders:
-        military_control_data.append({
-            'name': order_item.order.military_id.name,
-            # 'breakfast': order_item.
-        })
-
-
-
-
-def get_products_data(menus):
-    data = []
-    for menu in menus:
-        data.append(serializers.serialize('json', menu.products.all(), fields=('name',)))
-    return data
-
+    if request_date:
+        parsed_date = date.fromisoformat(request_date)
+        orders = models.Order.objects.filter(date=parsed_date).filter(
+            military_id__company__name=request.user.username).order_by('military_id')
+        order_items = models.OrderItem.objects.filter(order__in=orders).values('is_done')
+        for order in orders:
+            items = order_items.filter(order=order)
+            military_control_data.append({
+                'name': order.military_id.name,
+                'breakfast': items[0]['is_done'],
+                'lunch': items[1]['is_done'],
+                'dinner': items[2]['is_done']
+            })
+    return HttpResponse(json.dumps(military_control_data))
 
 def get_products_from_menu(menus):
+    """
+    Возвращает словарь с продуктами связанными с конкретным MealType
+    """
     response = {
         'mealtime_types': [],
         'products': []
@@ -58,7 +65,7 @@ def get_products_from_menu(menus):
 @csrf_exempt
 def mealpoint(request, id):
     # command to test: `curl -d "" http://127.0.0.1:8000/api/meal_point/military/<int: id>`
-    # its need to order exist for military with `id` for today
+    # order must exist for military with `id` for today
     channel_layer = get_channel_layer()
     today_order = models.Order.objects.filter(military_id=id).filter(date=date.today())
     now_time = datetime.now().time()

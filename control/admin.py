@@ -23,7 +23,7 @@ class OrderItemInline(admin.TabularInline):
 class Order(admin.ModelAdmin):
     inlines = (OrderItemInline,)
     list_display = ('date', 'military_id')
-    list_filter = ('date',)
+    list_filter = ('military_id__company__name', 'date')
 
     class Media:
         js = ("control/js/order.js",)
@@ -47,13 +47,7 @@ class Order(admin.ModelAdmin):
         }
 
     def get_mealpoint_control_data(self):
-        return {
-            'meal_control_data': [{
-                'military_name': 'Иван Рубец',
-                'breakfast': True,
-                'lunch': True,
-                'dinner': True
-            }]}
+        return {'meal_control_data': True}
 
     def get_form(self, request, obj=None, change=False, **kwargs):
         kwargs['form'] = forms.OrderForm
